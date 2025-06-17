@@ -1,0 +1,6 @@
+Django>=4.2
+python
+pytesseract>=0.3.10
+Pillow>=9.0.0
+xhtml2pdf>=0.2.5
+django-widget-tweaks>=1.4.12

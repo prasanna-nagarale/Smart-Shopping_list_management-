@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300 dark:from-slate-900 dark:to-gray-800 px-4 py-10">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-md animate-fade-in">
+    <h2 class="text-3xl font-bold text-center text-blue-600 dark:text-white mb-6">Create Account</h2>
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <input type="text" name="username" placeholder="Username" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white" required>
+      <input type="email" name="email" placeholder="Email" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white" required>
+      <input type="password" name="password" placeholder="Password" class="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white" required>
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition duration-300 shadow-md">Register</button>
+    </form>
+    <p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
+      Already have an account? <a href="{% url 'login' %}" class="text-blue-600 hover:underline">Login</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

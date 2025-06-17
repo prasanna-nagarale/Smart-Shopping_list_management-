@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Shopping List</title>
+    <style>
+        /* Modern, Clean PDF Styling */
+        @page {
+            margin: 2cm;
+            size: A4 portrait;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            line-height: 1.6;
+            color: #334155;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #6366f1;
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #1b1091;
+            margin: 0 0 0.5rem 0;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0;
+            font-weight: normal;
+        }
+        
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        thead {
+            background-color: #6366f1;
+            color: white;
+        }
+        
+        th {
+            text-align: left;
+            text-transform: uppercase;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 12px 16px;
+            letter-spacing: 0.05em;
+        }
+        
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .category-tag {
+            display: inline-block;
+            background-color: #e0e7ff;
+            color: #4338ca;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .quantity {
+            font-weight: 600;
+            color: #0f172a;
+        }
+        
+        .status-purchased {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .status-not-purchased {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        
+        .metadata {
+            display: flex;
+            justify-content: space-between;
+            color: #64748b;
+            font-size: 12px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Shopping List </h1>
+        <p class="subtitle">Your smart shopping assistant</p>
+    </div>
+    
+    <div class="metadata">
+        <div>Generated on: {% now "F j, Y" %}</div>
+        <div>Total Items: {{ items|length }}</div>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.name }}</td>
+                <td><span class="category-tag">{{ item.category }}</span></td>
+                <td class="quantity">{{ item.quantity }}</td>
+                <td class="{% if item.purchased %}status-purchased{% else %}status-not-purchased{% endif %}">
+                    {{ item.purchased|yesno:"Purchased,Not Purchased" }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="footer">
+        &copy; {% now "Y" %} ShoppingList+. All rights reserved.
+    </div>
+</body>
+</html>

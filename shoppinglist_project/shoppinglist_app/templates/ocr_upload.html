@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4 max-w-4xl">
+    <!-- Header Section -->
+    <div class="text-center mb-8 animate-fade-in">
+        <div class="inline-flex items-center justify-center mb-2">
+            <span class="text-indigo-600 dark:text-indigo-400 text-3xl mr-3">
+                <i class="fas fa-file-image"></i>
+            </span>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent">OCR Document Scanner</h1>
+        </div>
+        <p class="text-slate-600 dark:text-slate-300">Extract text from images in seconds</p>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="mb-10 animate-slide-up" style="animation-delay: 0.1s;">
+        <div class="glass-card rounded-xl shadow-lg overflow-hidden">
+            <form method="post" enctype="multipart/form-data" id="ocr-form">
+                {% csrf_token %}
+                
+                <!-- Drag & Drop Area -->
+                <div class="p-8 text-center">
+                    <div class="drag-drop-area border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-xl p-8 bg-white dark:bg-slate-800 cursor-pointer transition-all relative">
+                        <div class="mb-5 text-indigo-500 dark:text-indigo-400 animate-pulse-slow">
+                            <i class="fas fa-cloud-upload-alt text-5xl"></i>
+                        </div>
+                        <h3 class="text-xl font-medium mb-4 text-slate-700 dark:text-slate-200">Drag & drop your image here</h3>
+                        <p class="text-slate-500 dark:text-slate-400 mb-5">Or select a file from your device</p>
+                        
+                        <div class="relative inline-block">
+                            <input type="file" name="ocr_image" id="ocr-file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required>
+                            <button type="button" class="btn py-2.5 px-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition duration-300 font-medium flex items-center justify-center">
+                                <i class="fas fa-folder-open mr-2"></i>
+                                Choose File
+                            </button>
+                        </div>
+                        
+                        <div id="file-preview" class="mt-4 text-slate-700 dark:text-slate-300"></div>
+                    </div>
+                    
+                    <!-- Supported Formats Info -->
+                    <div class="mt-4 text-sm text-slate-500 dark:text-slate-400">
+                        <span class="font-medium">Supported formats:</span> JPG, PNG, TIFF, PDF
+                    </div>
+                    
+                    <!-- Extract Button -->
+                    <button type="submit" class="mt-6 py-3 px-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg shadow-md transition duration-300 font-medium flex items-center mx-auto">
+                        <i class="fas fa-magic mr-2"></i>
+                        Extract Text
+                    </button>
+                    <!-- View Previous OCR Uploads Button -->
+                        <a href="{% url 'ocr_uploaded_items' %}" class="mt-4 inline-block py-2 px-6 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white rounded-lg shadow-md transition duration-300 font-medium">
+                             <i class="fas fa-history mr-2"></i> View Previous OCR Uploads
+                        </a>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    {% if items %}
+    <div class="results-section animate-slide-up" style="animation-delay: 0.2s;">
+        <div class="glass-card rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-white mr-3 text-xl"></i>
+                    <h2 class="text-xl font-bold">Extracted Items</h2>
+                </div>
+                <div class="actions flex items-center space-x-2">
+                    <button class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-1.5 rounded transition text-sm flex items-center" id="copy-btn">
+                        <i class="fas fa-copy mr-1.5"></i>Copy All
+                    </button>
+                    <a href="{% url 'export_items' %}" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-1.5 rounded transition text-sm flex items-center">
+                        <i class="fas fa-file-export mr-1.5"></i>Export
+                    </a>
+                    <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded transition text-sm flex items-center" id="add-all-btn">
+                        <i class="fas fa-plus mr-1.5"></i>Add All
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Items Grid -->
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {% for item in items %}
+                    <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition p-4 flex justify-between items-center">
+                        <span class="text-slate-800 dark:text-slate-200 font-medium">{{ item|capfirst }}</span>
+                        <button class="bg-green-500 hover:bg-green-600 text-white w-8 h-8 rounded-full flex items-center justify-center transition add-to-list-btn" data-item="{{ item }}" title="Add to List">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabbed Output Section -->
+        <div class="glass-card rounded-xl shadow-lg overflow-hidden mb-8 animate-slide-up" style="animation-delay: 0.3s;">
+            <div class="bg-white dark:bg-slate-800 rounded-t-xl border-b border-slate-200 dark:border-slate-700">
+                <div class="flex" role="tablist">
+                    <button class="tab-btn active px-6 py-3 text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 font-medium text-sm" id="list-tab" data-tab="list-view" type="button" role="tab">
+                        <i class="fas fa-list mr-2"></i>List View
+                    </button>
+                    <button class="tab-btn px-6 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 font-medium text-sm" id="json-tab" data-tab="json-view" type="button" role="tab">
+                        <i class="fas fa-code mr-2"></i>JSON View
+                    </button>
+                </div>
+            </div>
+            
+            <div class="tab-content">
+                <!-- List View Tab -->
+                <div class="tab-pane active p-0" id="list-view">
+                    <ul class="divide-y divide-slate-200 dark:divide-slate-700">
+                        {% for item in items %}
+                        <li class="flex justify-between items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                            <span class="text-slate-800 dark:text-slate-200">{{ item|capfirst }}</span>
+                            <button class="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1.5 rounded transition flex items-center add-to-list-btn" data-item="{{ item }}">
+                                <i class="fas fa-plus mr-1.5"></i>Add
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                
+                <!-- JSON View Tab -->
+                <div class="tab-pane hidden" id="json-view">
+                    <div class="bg-slate-900 text-white overflow-hidden">
+                        <div class="flex justify-between items-center p-3 border-b border-slate-700">
+                            <span class="font-medium">JSON Output</span>
+                            <div class="flex items-center">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="pretty-print" class="sr-only peer" checked>
+                                    <div class="relative w-11 h-6 bg-slate-700 peer-checked:bg-indigo-500 rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                                    <span class="ml-2 text-sm text-slate-300">Pretty-print</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="p-4 overflow-auto" style="max-height: 300px;">
+                            <pre class="text-indigo-200 font-mono text-sm"><code id="json-output">{"items": [{% for item in items %}"{{ item }}"{% if not forloop.last %}, {% endif %}{% endfor %}]}</code></pre>
+                        </div>
+                        <div class="p-3 border-t border-slate-700 text-right">
+                            <button class="bg-slate-700 hover:bg-slate-600 text-white text-sm px-3 py-1.5 rounded transition flex items-center ml-auto" id="copy-json-btn">
+                                <i class="fas fa-copy mr-1.5"></i>Copy JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        <!-- Return Button -->
+        <div class="text-center mb-8 animate-slide-up" style="animation-delay: 0.4s;">
+            <a href="{% url 'ocr_upload' %}" class="inline-flex items-center px-4 py-2 border border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-800 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 transition">
+                <i class="fas fa-arrow-left mr-2"></i>Scan Another Image
+            </a>
+            <a href="{% url 'view_ocr_uploads' %}" class="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg">
+                <i class="fas fa-history mr-2"></i>View Previous OCR Uploads
+            </a>
+        </div>
+    </div>
+    
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // File input handling
+    const fileInput = document.getElementById('ocr-file-input');
+    const filePreview = document.getElementById('file-preview');
+    const dragDropArea = document.querySelector('.drag-drop-area');
+    
+    if (fileInput && filePreview) {
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const fileName = this.files[0].name;
+                filePreview.innerHTML = `
+                    <div class="mt-3 inline-flex items-center px-3 py-2 rounded-lg bg-indigo-100 dark:bg-indigo-900 dark:bg-opacity-40 text-indigo-800 dark:text-indigo-300">
+                        <i class="fas fa-file-alt mr-2"></i>
+                        <span class="font-medium">${fileName}</span>
+                    </div>
+                `;
+            }
+        });
+    }
+    
+    // Drag and drop functionality
+    if (dragDropArea) {
+        ['dragover', 'dragenter'].forEach(eventName => {
+            dragDropArea.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                this.classList.add('border-indigo-500', 'bg-indigo-50', 'dark:bg-slate-700');
+            });
+        });
+        
+        ['dragleave', 'dragend', 'drop'].forEach(eventName => {
+            dragDropArea.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                this.classList.remove('border-indigo-500', 'bg-indigo-50', 'dark:bg-slate-700');
+            });
+        });
+        
+        dragDropArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                
+                if (fileInput.files[0]) {
+                    const fileName = fileInput.files[0].name;
+                    filePreview.innerHTML = `
+                        <div class="mt-3 inline-flex items-center px-3 py-2 rounded-lg bg-indigo-100 dark:bg-indigo-900 dark:bg-opacity-40 text-indigo-800 dark:text-indigo-300">
+                            <i class="fas fa-file-alt mr-2"></i>
+                            <span class="font-medium">${fileName}</span>
+                        </div>
+                    `;
+                }
+            }
+        });
+    }
+    
+    // Tab switching
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Update active tab button
+            tabBtns.forEach(b => {
+                b.classList.remove('active', 'text-indigo-600', 'dark:text-indigo-400', 'border-b-2', 'border-indigo-600', 'dark:border-indigo-400');
+                b.classList.add('text-slate-500', 'dark:text-slate-400', 'hover:text-slate-700', 'dark:hover:text-slate-300');
+            });
+            this.classList.add('active', 'text-indigo-600', 'dark:text-indigo-400', 'border-b-2', 'border-indigo-600', 'dark:border-indigo-400');
+            this.classList.remove('text-slate-500', 'dark:text-slate-400', 'hover:text-slate-700', 'dark:hover:text-slate-300');
+            
+            // Show active tab content
+            const tabId = this.getAttribute('data-tab');
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.add('hidden');
+                pane.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+    
+    // Pretty print JSON toggle
+    const prettyPrintCheckbox = document.getElementById('pretty-print');
+    const jsonOutput = document.getElementById('json-output');
+    
+    if (prettyPrintCheckbox && jsonOutput) {
+        // Initial pretty printing
+        try {
+            const jsonStr = jsonOutput.textContent;
+            const jsonObj = JSON.parse(jsonStr);
+            jsonOutput.textContent = JSON.stringify(jsonObj, null, 2);
+        } catch (e) {
+            console.error('Invalid JSON');
+        }
+        
+        prettyPrintCheckbox.addEventListener('change', function() {
+            const jsonStr = jsonOutput.textContent;
+            try {
+                const jsonObj = JSON.parse(jsonStr);
+                if (this.checked) {
+                    jsonOutput.textContent = JSON.stringify(jsonObj, null, 2);
+                } else {
+                    jsonOutput.textContent = JSON.stringify(jsonObj);
+                }
+            } catch (e) {
+                console.error('Invalid JSON');
+            }
+        });
+    }
+    
+    // Copy JSON button functionality
+    const copyJsonBtn = document.getElementById('copy-json-btn');
+    if (copyJsonBtn && jsonOutput) {
+        copyJsonBtn.addEventListener('click', function() {
+            const jsonStr = jsonOutput.textContent;
+            navigator.clipboard.writeText(jsonStr).then(function() {
+                const originalHTML = copyJsonBtn.innerHTML;
+                copyJsonBtn.innerHTML = '<i class="fas fa-check mr-1.5"></i>Copied';
+                setTimeout(function() {
+                    copyJsonBtn.innerHTML = originalHTML;
+                }, 2000);
+            });
+        });
+    }
+    
+    // Copy all button functionality
+    const copyBtn = document.getElementById('copy-btn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function() {
+            const items = Array.from(document.querySelectorAll('.items-grid .item-name')).map(item => item.textContent);
+            navigator.clipboard.writeText(items.join('\n')).then(function() {
+                const originalHTML = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check mr-1.5"></i>Copied';
+                setTimeout(function() {
+                    copyBtn.innerHTML = originalHTML;
+                }, 2000);
+            });
+        });
+    }
+    
+    // Add to list buttons functionality
+    const addToListBtns = document.querySelectorAll('.add-to-list-btn');
+    addToListBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const item = this.getAttribute('data-item');
+            // Add to shopping list functionality
+            fetch('/api/add-item/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ item: item })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success indicator
+                    const originalHTML = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(() => {
+                        this.innerHTML = originalHTML;
+                    }, 2000);
+                }
+            });
+        });
+    });
+    
+    // Add all items button functionality
+    const addAllBtn = document.getElementById('add-all-btn');
+    if (addAllBtn) {
+        addAllBtn.addEventListener('click', function() {
+            const items = Array.from(document.querySelectorAll('.items-grid .item-name')).map(item => item.textContent);
+            // Send all items to the API
+            fetch('/api/add-items/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ items: items })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success indicator
+                    const originalHTML = addAllBtn.innerHTML;
+                    addAllBtn.innerHTML = '<i class="fas fa-check mr-1.5"></i>Added';
+                    setTimeout(() => {
+                        addAllBtn.innerHTML = originalHTML;
+                    }, 2000);
+                }
+            });
+        });
+    }
+    
+    // Helper function to get cookies (for CSRF token)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+});
+</script>
+{% endblock %}

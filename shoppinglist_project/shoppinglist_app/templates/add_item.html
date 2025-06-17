@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Add Item{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-lg mx-auto animate-fade-in">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-white flex items-center justify-center">
+                <span class="text-indigo-600 dark:text-indigo-400 mr-2">
+                    <i class="fas fa-plus-circle"></i>
+                </span>
+                Add New Item
+            </h2>
+            <p class="text-slate-500 dark:text-slate-400">Add an item to your shopping list</p>
+        </div>
+
+        <!-- Card -->
+        <div class="glass-card rounded-xl shadow-xl overflow-hidden animate-slide-up">
+            <div class="p-6">
+                <form method="post" class="space-y-5">
+                    {% csrf_token %}
+                    
+                    <!-- Name Input -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Item Name
+                        </label>
+                        <div class="relative flex">
+                            <input type="text" id="name" name="name" 
+                                class="flex-grow rounded-l-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent transition-all duration-200"
+                                placeholder="e.g. Tomatoes" required>
+                            <button type="button" onclick="startVoiceInput('name')" 
+                                class="px-3 py-2 bg-indigo-100 dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 rounded-r-lg hover:bg-indigo-200 dark:hover:bg-slate-600 transition-all duration-200"
+                                title="Use voice input">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Category Input -->
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Category
+                        </label>
+                        <div class="relative flex">
+                            <input type="text" id="category" name="category" 
+                                class="flex-grow rounded-l-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent transition-all duration-200"
+                                placeholder="e.g. Vegetables" required>
+                            <button type="button" onclick="startVoiceInput('category')" 
+                                class="px-3 py-2 bg-indigo-100 dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 rounded-r-lg hover:bg-indigo-200 dark:hover:bg-slate-600 transition-all duration-200"
+                                title="Use voice input">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quantity Input -->
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Quantity
+                        </label>
+                        <input type="number" id="quantity" name="quantity" min="1" value="1"
+                            class="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent transition-all duration-200"
+                            placeholder="e.g. 3" required>
+                    </div>
+                    
+                    <!-- Purchase Status -->
+                    <div>
+                        <label for="purchased" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Status
+                        </label>
+                        <select id="purchased" name="purchased"
+                            class="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent transition-all duration-200">
+                            <option value="False" selected>To Buy</option>
+                            <option value="True">Already Purchased</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                        class="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
+                        <i class="fas fa-plus-circle mr-2"></i>Add to Shopping List
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Quick Navigation -->
+        <div class="mt-6 text-center">
+            <a href="{% url 'item_list' %}" class="inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition">
+                <i class="fas fa-arrow-left mr-2"></i> Back to My List
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
